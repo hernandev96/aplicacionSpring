@@ -1,14 +1,16 @@
 package mx.uam.tsis.ejemplobackend.negocio;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import mx.uam.tsis.ejemplobackend.datos.AlumnoRepository;
 import mx.uam.tsis.ejemplobackend.negocio.modelo.Alumno;
 
 @Service
+@Slf4j
 public class AlumnoService{
 	
 	@Autowired
@@ -19,8 +21,8 @@ public class AlumnoService{
 	 * **/
 	public Alumno create(Alumno nuevoAlumno){
 		//no se pueden registrar dos alumnos con la misma matricula
-		Alumno alumno=alumnoRepository.findByMatricula(nuevoAlumno.getMatricula());
-		if(alumno==null){
+		Optional <Alumno> alumnoOpt=alumnoRepository.findById(nuevoAlumno.getMatricula());
+		if(!alumnoOpt.isPresent()){
 			 return alumnoRepository.save(nuevoAlumno);
 		}else{
 			return null;
@@ -30,17 +32,17 @@ public class AlumnoService{
 	 * obtiene todos los alumnos
 	 * @return List<Alumno>
 	 * **/
-	public List<Alumno> retriveAll(){
-		return alumnoRepository.find();
+	public Iterable<Alumno> retriveAll(){
+		return alumnoRepository.findAll();
 	}
 	/**
 	 * obtiene un alumno segun su matricula
 	 * @param Integer matricula
 	 * @return Alumno
 	 * **/
-	public Alumno retriveById(Integer matricula){
-		Alumno alumno=alumnoRepository.findByMatricula(matricula);
-		if(alumno!=null){
+	public Optional<Alumno> retriveById(Integer matricula){
+		Optional <Alumno> alumno=alumnoRepository.findById(matricula);
+		if(alumno.isPresent()){
 			return alumno;
 		}else{
 			return null;
@@ -51,14 +53,25 @@ public class AlumnoService{
 	 * @param Alumno nuevoAlumno
 	 * @return boolean
 	 * **/
-	public boolean update(Integer matricula,Alumno nuevoAlumno){
-		return alumnoRepository.Update(matricula, nuevoAlumno);
+	public boolean update(Alumno nuevoAlumno){
+		Alumno alumno=alumnoRepository.save( nuevoAlumno);
+		if(alumno!=null){
+			return true;
+		}else {
+			return false;
+		}
 	}
 	/**
 	 * @param Integer matricula
 	 * @return boolean
 	 * **/
 	public boolean delete(Integer matricula){
-		return alumnoRepository.delete(matricula);
+		try {
+			alumnoRepository.deleteById(matricula);
+			return true;
+		}catch(IllegalArgumentException ex){
+			log.info("no se pudo borrar el alumno"+ex.getMessage());
+			return false;
+		} 
 	}
 }
