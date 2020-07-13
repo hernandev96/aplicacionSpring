@@ -1,11 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<title>Insert title here</title>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<meta charset="utf-8">
+	<title>Consulta alumnos</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
+<style>
+	th{
+		border:solid 1px;
+		padding:10px;
+		background-color:greenyellow;
+	}
+	td{
+		border:solid 1px;
+		padding:10px;
+			
+	}
+	.scroll{
+		overflow-y:auto;
+		overflow-x:hidden;
+		width:350px;
+		height:400px;
+		scrollbar-width:5px;
+	}
+	.scroll::-webkit-scrollbar {
+    	width: 20px;
+    }
+	
+</style>
 <body>
 <header class="bg-dark" style="padding-top:15px;padding-bottom:15px;">
 	<center>
@@ -27,26 +51,69 @@
   									<path fill-rule="evenodd" d="M5.187 1.025C6.23.749 7.337.5 8 .5c.662 0 1.77.249 2.813.525a61.09 61.09 0 0 1 2.772.815c.528.168.926.623 1.003 1.184.573 4.197-.756 7.307-2.367 9.365a11.191 11.191 0 0 1-2.418 2.3 6.942 6.942 0 0 1-1.007.586c-.27.124-.558.225-.796.225s-.526-.101-.796-.225a6.908 6.908 0 0 1-1.007-.586 11.192 11.192 0 0 1-2.417-2.3C2.167 10.331.839 7.221 1.412 3.024A1.454 1.454 0 0 1 2.415 1.84a61.11 61.11 0 0 1 2.772-.815zm3.328 6.884a1.5 1.5 0 1 0-1.06-.011.5.5 0 0 0-.044.136l-.333 2a.5.5 0 0 0 .493.582h.835a.5.5 0 0 0 .493-.585l-.347-2a.5.5 0 0 0-.037-.122z"/>
 								</svg>
 						  	</div>&nbsp;&nbsp;&nbsp;
-						  	<input type="text" class="form-control" placeholder="Matricula" aria-label="Username" aria-describedby="basic-addon1">
+						  	<input id="matricula" type="number" class="form-control" placeholder="Matricula" aria-label="Username" aria-describedby="basic-addon1">
 						</div>
 					</div>
 				</div>
 				<div class="row">
 					<div class="col-md">
-						<button class="btn btn-success">Consultar</button>
+						<button class="btn btn-success" id="retrieve">Consultar</button>
 						&nbsp;&nbsp;&nbsp;
 						<a class="btn btn-danger" href="/">Regresar</a>
 					</div>
 				</div>
 			</div>
 			<div class="card-footer">
-				<button class="btn btn-primary">Mostrar todos los alumnos</button>
+				<button class="btn btn-primary" id="retrieveAll">Mostrar todos los alumnos</button>
 			</div>
 		</div>
 	</div>
 	<div class="container"> 
-		<h1>Aqui se va a mostrar el alumno o los alumnos </h1>
+		<div class="scroll"id="result">
+			
+		</div>
 	</div>
 </div>
 </body>
 </html>
+<script>
+$("button").click(function(){
+	$.ajaxSetup({contentType:"application/json; charset=utf-8"});
+	var action=$(this).attr("id");
+	document.getElementById("result").innerHTML="";
+	if(action==="retrieveAll"){
+		console.log("Recuperaras todos los alumnos");
+		$.get("http://localhost:3000/alumnos",function(data, status){
+			console.log(status);
+			console.log(data);
+			console.log(data.length);
+			var i;
+			var size=data.length;
+			
+			$("#result").append($("<table>"));
+			$("#result").append($("<tr><th>Matricula</th><th>Nombre</th><th>Carrera</th></tr>"));
+			for(i=0;i<size;i++){
+				var matricula=data[i].matricula;
+				var Nombre=data[i].nombre;
+				var carrera=data[i].carrera;
+				$("#result").append($("<tr><td>"+matricula+"</td><td>"
+						+Nombre+"</td><td>"+carrera+"</td></tr>"));
+			}
+			$("#contenido").append($("</table>"));
+		});
+	}else{
+		var mat=$("#matricula").val();
+		console.log("Recuperaras un alumno por la matricula: "+mat);
+		$.get("http://localhost:3000/alumnos/"+mat,function(data, status){
+			console.log(status);
+			var estado=status;
+			var matricula=data.matricula;
+			var carrera=data.carrera;
+			var nombre=data.nombre;
+			$("#result").append($("<label><strong>"+"Matricula:  "+"</strong>"+matricula+"</label><br>"));
+			$("#result").append($("<label><strong>"+"Nombre:  "+"</strong>"+nombre+"</label><br>"));
+			$("#result").append($("<label><strong>"+"Carrera:  "+"</strong>"+carrera+"</label><br>"));
+		});
+	}
+});
+</script>

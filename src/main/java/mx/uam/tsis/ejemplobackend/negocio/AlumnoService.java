@@ -42,7 +42,7 @@ public class AlumnoService{
 	 * **/
 	public Optional<Alumno> retriveById(Integer matricula){
 		Optional <Alumno> alumno=alumnoRepository.findById(matricula);
-		if(alumno.isPresent()){
+		if(alumno.isPresent()){     
 			return alumno;
 		}else{
 			return null;

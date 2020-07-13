@@ -90,8 +90,10 @@ public class AlumnoController {
 	public  ResponseEntity <?> replaceAlumn(@RequestBody @Valid Alumno nuevoAlumno ,@PathVariable("matricula") Integer matricula) {
 		log.info("Buscando alumno a actualizar");
 		boolean result=alumnoService.update(nuevoAlumno);
+		
 		if(result){
-			return ResponseEntity.status(HttpStatus.OK).body("alumno actualizado");
+			Optional <Alumno> alumno=alumnoService.retriveById(matricula);
+			return ResponseEntity.status(HttpStatus.OK).body(alumno);
 		}else{
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no se pudo actualizar el alumno");
 		}
